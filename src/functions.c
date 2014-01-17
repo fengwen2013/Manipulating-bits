@@ -1,6 +1,51 @@
 #include "hw1.h"
 void hexdumpStdin(){
-	printf("hexdumpStdin()\n");
+	unsigned char ch = 0;
+	int count = 0;
+	char buff[17];
+	while(read(0, &ch, sizeof(ch))){
+		if(count % 16 == 0){
+			
+			if(count != 0){
+				buff[16] = 0;
+				puts(buff);
+				putchar('\n');			
+			}	
+			printf("%06x: ", count);
+		}
+	
+		printf("%02x ", ch);
+		if(ch <= 0x1f || ch == 0x7f){
+			ch = '.';
+		}
+		else{ 
+			if(ch >= 0x80){
+				ch = '~';
+			}
+			
+		}
+		
+		buff[count % 16] = ch;
+		count++;
+		if(count % 8 == 0){
+			putchar(' ');		
+		}
+
+		
+	}
+	while(count % 16 != 0){		
+		if(count % 8 == 0){
+			putchar(' ');
+		}		
+		buff[count % 16] = ' ';
+		printf("-- ");
+				
+		count++;
+		
+	}
+	buff[16] = 0;
+	printf(" %s\n", buff);
+	
 }
 void encBase64Stdin(){
 	printf("enc-base64Stdin()\n");
