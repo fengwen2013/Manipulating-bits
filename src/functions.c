@@ -122,7 +122,7 @@ void encBase64File(char *fileName){
                                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                                 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
                                 'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                '4', '5', '6', '7', '8', '9', '+', '/'};
+                                '4', '5', '6', '7', '8', '9', '+', '/', '='};
 	FILE *ifp = NULL;
 	char *mode = "r";
 	ifp = fopen(fileName, mode);
@@ -132,29 +132,35 @@ void encBase64File(char *fileName){
 	unsigned char b1 = 0;
 	unsigned char b2 = 0;
 	unsigned char b3 = 0;
-	printf("encBase64File()\n");
-	printf("File Name: %s\n", fileName);
-
-	while(!feof(ifp)){
-		buff[0] = buff[1] = buff[2] = 0;		
-		fread(buff, sizeof(buff)/sizeof(char), 1, ifp);
-		count++;
+	int length = 0;
+	fseek(ifp, 0, SEEK_END);
+	length = ftell(ifp);
+	fseek(ifp, 0, SEEK_SET);
+	while(count < length){
+		buff[0] = buff[1] = buff[2] = 0;
+		fread(buff, sizeof(buff)/sizeof(char), 1, ifp);	
+		count += 3;
 		b0 = (buff[0] & 0xfc) >> 2;
-		b1 = ((buff[0] & 0x03) << 4) & (buff[1] >> 4);
-		b2 = ((buff[1] & 0x0f) << 2) & ((buff[2] && 0xc0) >> 6);
+		b1 = ((buff[0] & 0x03) << 4) | (buff[1] >> 4);
+		b2 = ((buff[1] & 0x0f) << 2) | ((buff[2] & 0xc0) >> 6);
 		b3 = buff[2] & 0x3f;
-		if(!buff[1]){
-			b2 = b3 = '=';
+		if(count - length == 2){
+			b2 = b3 = 64;
 		}
-		if(!buff[2]){
-			b3 = '=';
+		if(count - length == 1){
+			b3 = 64;
 		}		
 		putchar(base64_table[b0]);
 		putchar(base64_table[b1]);
 		putchar(base64_table[b2]);
 		putchar(base64_table[b3]);
-		if(count % 16)
+		if(count % 48 == 0 && count < length){
 			printf("\n");
+		}	
+	}
+
+	if(count){
+		printf("\n");
 	}
 }
 void decBase64File(char *fileName){
