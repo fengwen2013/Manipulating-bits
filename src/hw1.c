@@ -60,3 +60,4 @@ void twoArguments(char *argv[]){
 		printf("Error: this file doesn't exsit\n");	
 	}
 }
+

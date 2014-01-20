@@ -3,10 +3,16 @@ set dir=/home/feng/WorkPlace/CSCI531HW/HW1/Manipulating-bits
 # for the following commands, each correct answer gets 1 point
 #
 rm $dir/files/*.*
-foreach f (0 1 2 3 4 5 6 7 8 9)
+foreach f (0 1 2 3 4 5 6 7 8 9 10)
 	echo "===> $dir/files/f$f"
 	$dir/src/hw1 enc-base64 $dir/files/f$f > $dir/files/f$f.b64
 	openssl enc -e -base64 -in $dir/files/f$f > $dir/files/s_e_f$f.b64
 	diff $dir/files/f$f.b64 $dir/files/s_e_f$f.b64
 end
 
+foreach f (0 1 2 3 4 5 6 7 8 9 10)
+	echo "===> $dir/files/s_e_f$f.b64"
+	$dir/src/hw1 dec-base64 $dir/files/s_e_f$f.b64 > $dir/files/ef$f.b64
+	#openssl enc -e -base64 -in $dir/files/s_e_f$f.b64 > $dir/files/s_d_f$f.b64
+	diff $dir/files/ef$f.b64 $dir/files/f$f
+end

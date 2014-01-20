@@ -1,4 +1,15 @@
 #include "hw1.h"
+
+unsigned char *base64_enc_table = NULL;
+static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
+                                '4', '5', '6', '7', '8', '9', '+', '/', '='};
+
 void hexdumpStdin(){
 	unsigned char ch = 0;
 	int count = 0;
@@ -114,15 +125,10 @@ void hexdumpFile(char *fileName){
 	fclose(ifp);
 
 }
+
+
 void encBase64File(char *fileName){
-	static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                '4', '5', '6', '7', '8', '9', '+', '/', '='};
+	
 	FILE *ifp = NULL;
 	char *mode = "r";
 	ifp = fopen(fileName, mode);
@@ -164,6 +170,84 @@ void encBase64File(char *fileName){
 	}
 }
 void decBase64File(char *fileName){
-	printf("decBase64File()\n");
-	printf("File Name: %s\n", fileName);
+	FILE *ifp = NULL;
+	char *mode = "r";
+	ifp = fopen(fileName, mode);
+	int count = 0;
+	static int endComing = 0;
+	unsigned char buff[4];
+	unsigned char b0 = 0;
+	unsigned char b1 = 0;
+	unsigned char b2 = 0;	
+	int length = 0, i = 0, j = 0;
+	unsigned char ch = 0;
+	fseek(ifp, 0, SEEK_END);
+	length = ftell(ifp);
+	fseek(ifp, 0, SEEK_SET);
+	base64_enc_table = generateEncTable();
+	if(!base64_enc_table){
+		printf("insufficient Memory!\n");
+		return;
+	}
+	for(; count < length; i = 0){
+		buff[0] = buff[1] = buff[2] = buff[3] = 0;
+		
+		for(; i < 4 && count < length;){
+			ch = fgetc(ifp);
+			count++;
+			
+			if(!isValidChar(ch)){
+				printf("%s has invalid base64 character!\n", fileName);
+				return;
+			}
+			for(; ch == '\n' && count < length; ch = fgetc(ifp), count++);
+			if(ch != '=' && ch != '\n'){
+				buff[i] = base64_enc_table[ch - DEC_TABLE_OFFSET];
+				i++;
+			}
+			else{
+				endComing = i;
+				break;
+			}
+			 
+		}
+		
+		if(i == 0) break;
+		b0 = (buff[0] << 2) | (buff[1] >> 4);
+		b1 = (buff[1] << 4) | (buff[2] >> 2);
+		b2 = (buff[2] << 6) | (buff[3]);
+		putchar(b0);
+		if(endComing == 2) break;
+		putchar(b1);
+		if(endComing == 3) break;
+		putchar(b2);
+	}
+	
+	
+
+	free(base64_enc_table);
+
 }
+
+int isValidChar(char ch){
+	if(ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' 
+		|| ch >= 'A' && ch <= 'Z' || ch == '+' || ch == '/' || ch == '\n' || ch == '='){
+		return 1;
+	}
+	else{
+		return 0;	
+	}
+}
+
+unsigned char * generateEncTable(){
+	int i = 0;
+	unsigned char *encTableP = (char*) calloc(DEC_TABLE_LENGTH, sizeof(char));
+	if(encTableP != NULL){
+		for(; i < ENC_TABLE_LENGTH; i++){
+			encTableP[base64_table[i]-DEC_TABLE_OFFSET] = i; 
+		}
+		
+	}
+	return encTableP;
+}
+
