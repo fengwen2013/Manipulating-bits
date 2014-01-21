@@ -138,7 +138,7 @@ void decBase64Stdin(){
 				return;
 			}
 			for(; ch == '\n'; count++){
-				if(read(0, &ch, sizeof(unsigned char)) < 0){
+				if(read(0, &ch, sizeof(unsigned char)) <= 0){
 					break;
 				}
 			}
