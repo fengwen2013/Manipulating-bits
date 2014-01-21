@@ -1,0 +1,21 @@
+s
+df
+s
+ad
+f
+asf
+e
+wf
+w
+ef
+wf
+w
+ef
+wf
+w
+efw
+fw
+if(ch != '=' && ch != '\n'){
+				buff[i] = base64_enc_table[ch - DEC_TABLE_OFFSET];
+				i++;
+			}

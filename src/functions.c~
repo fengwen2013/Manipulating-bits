@@ -152,7 +152,7 @@ void decBase64Stdin(){
 			if(read(0, &ch, sizeof(unsigned char)) <= 0)
 				break;
 		}while(i < 4);
-		buff = (bf[0] << 24) + (bf[1] << 16) + (bf[2] << 8) + bf[3];
+		buff = bf[0] << 24 + bf[1] << 16 + bf[2] << 8 + bf[3];
 		
 		if(i == 0) break;
 		b0 = (buff & 0x3f000000) >> 22 | (buff & 0x00300000) >> 20;
