@@ -19,8 +19,7 @@ void hexdumpStdin(){
 			
 			if(count != 0){
 				buff[16] = 0;
-				puts(buff);
-				putchar('\n');			
+				puts(buff);			
 			}	
 			printf("%06x: ", count);
 		}
@@ -46,17 +45,15 @@ void hexdumpStdin(){
 	}
 	if(count != 0){
 		while(count % 16 != 0){		
+			buff[count % 16] = ' ';
+			printf("-- ");	
+			count++;
 			if(count % 8 == 0){
 				putchar(' ');
-			}		
-			buff[count % 16] = ' ';
-			printf("-- ");
-					
-			count++;
-		
+			}				
 		}
 		buff[16] = 0;
-		printf(" %s\n", buff);
+		printf("%s\n", buff);
 	}
 }
 void encBase64Stdin(){
@@ -215,15 +212,15 @@ void hexdumpFile(char *fileName){
 
 	if(count != 0){
 		while(count % 16 != 0){		
+			buff[count % 16] = ' ';
+			printf("-- ");	
+			count++;
 			if(count % 8 == 0){
 				putchar(' ');
-			}		
-			buff[count % 16] = ' ';
-			printf("-- ");				
-			count++;	
+			}				
 		}
 		buff[16] = 0;
-		printf(" %s\n", buff);
+		printf("%s\n", buff);
 	}
 
 	fclose(ifp);
@@ -283,10 +280,13 @@ void decBase64File(char *fileName){
 	unsigned char b0 = 0;
 	unsigned char b1 = 0;
 	unsigned char b2 = 0;	
-	int length = 0, i = 0, j = 0;
+	int length = 0, i = 0;
 	unsigned char ch = 0;
 	fseek(ifp, 0, SEEK_END);
 	length = ftell(ifp);
+	if(length == 0){
+		fprintf(stderr, "NULL Document Error!!!");
+	}
 	fseek(ifp, 0, SEEK_SET);
 	base64_enc_table = generateEncTable();
 	if(!base64_enc_table){
@@ -334,8 +334,8 @@ void decBase64File(char *fileName){
 }
 
 int isValidChar(char ch){
-	if(ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' 
-		|| ch >= 'A' && ch <= 'Z' || ch == '+' || ch == '/' || ch == '\n' || ch == '='){
+	if((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') 
+		|| (ch >= 'A' && ch <= 'Z') || ch == '+' || ch == '/' || ch == '\n' || ch == '='){
 		return 1;
 	}
 	else{
@@ -345,7 +345,7 @@ int isValidChar(char ch){
 
 unsigned char * generateEncTable(){
 	int i = 0;
-	unsigned char *encTableP = (char*) calloc(DEC_TABLE_LENGTH, sizeof(char));
+	unsigned char *encTableP = (unsigned char*) calloc(DEC_TABLE_LENGTH, sizeof(unsigned char));
 	if(encTableP != NULL){
 		for(; i < ENC_TABLE_LENGTH; i++){
 			encTableP[base64_table[i]-DEC_TABLE_OFFSET] = i; 
