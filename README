@@ -1,1 +1,56 @@
-Manipulating bits
+Manipulating-bits(hw1) Version 1.0 01/25/2014
+
+GENERAL INFORMATION
+--------------------------------
+STRUCTURE:
+
+hw1.c: handle commands and invoke corresponding functions
+functions.c: implement hexdump, base64 encode and base64 decode
+hw1.h: include all header files and function declarations
+makefile
+
+RUNING ENVIRONMNET: Linux, Unix
+
+
+HOW TO COMPILE
+--------------------------------
+Makefile is included, simply enters:
+    make hw1(or make)
+an executable named hw1 is created.
+
+HOW TO USE
+--------------------------------
+The COMMANDLINE syntax for hw1 is as follows:
+    hw1 hexdump [file]
+    hw1 enc-base64 [file]
+    hw1 dec-base64 [file]
+If file is not specified, the program will read from stdin. Output of the program will go to stdout and error messages will go to stderr.
+
+The OUTPUT for various commands are as follows.
+
+1. hexdump:  	Each line in the output corresponds to 16 bytes of the input file. 
+Sample output:
+
+000630: cc 4a be 52 93 db d4 62  29 53 b9 ce 6b 0a 12 9b  ~J~R~~~b)S~~k..~
+000640: ca dc 64 3c 8b c1 49 a7  90 b2 90 5b 08 e7 26 ee  ~~d<~~I~~~~[.~&~
+000650: 69 84 4e be 40 09 ff 4c  42 40 0b 81 ce 16 b8 e1  i~N~@.~LB@.~~.~~
+000660: 0e 2b 38 e8 37 bb 29 0d  6a 3a 14 8f b0 04 e8 43  .+8~7~).j:.~~.~C
+000670: d9 d8 cb 22 44 94 08 17  1d 02 1c 33 a1 90 51 21  ~~~"D~.....3~~Q!
+000680: 74 f4 0c fa f4 e8 46 2d  3a 52 8c b6 c1 a4 ee 3c  t~.~~~F-:R~~~~~<
+000690: 65 4a 7d 90 86 10 00 00  3b -- -- -- -- -- -- --  eJ}~~...;  
+
+
+If the data byte is >=0x20 and <=0x7e, corresponding ASCII character is used. 
+If the data byte is <=0x1f or equals to 0x7f, a period character will be printed. 
+If the data byte is >=0x80 a ~ character will be printed.
+In addition, non-existant bytes (at the end of the file) will display as -- and space characters in the right column is used.
+
+ 
+2. enc-base64: Encode anydata into Base64 data and output the result
+ 
+3. dec-base64: Decode any valid Base64 data and output the the result
+
+CONTACT IMFORMATION:
+--------------------------------
+Email:	 fengwen@usc.edu
+Website: www-scf.usc.edu/~fengwen 
