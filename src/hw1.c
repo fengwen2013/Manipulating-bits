@@ -1,3 +1,8 @@
+/****************************************************
+	Autor: Feng Wen
+	Email: fengwen@usc.edu
+	Date: 01/25/2014
+*****************************************************/
 #include "hw1.h"
 
 int main(int argc, char *argv[]){
@@ -10,6 +15,10 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
+/*
+	Handle the situation where user only input one argument, display error information when
+	invalid argument is inputed
+*/
 void oneArgument(char *argv[]){
 	if(strcmp(argv[1], "hexdump") == 0){
 		hexdumpStdin();	
@@ -29,6 +38,10 @@ void oneArgument(char *argv[]){
 	}
 }
 
+/*
+	Handle the situation where user input two arguments, display error information when invalid 
+	arguments are inputed or file doesn't exist 
+*/
 void twoArguments(char *argv[]){
 	int funcFlag = 0;
 	if(strcmp(argv[1], "hexdump") == 0){

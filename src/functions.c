@@ -1,6 +1,11 @@
+/****************************************************
+	Autor: Feng Wen
+	Email: fengwen@usc.edu
+	Date: 01/25/2014
+*****************************************************/
 #include "hw1.h"
 
-unsigned char *base64_enc_table = NULL;
+unsigned char *base64_dec_table = NULL; //declare base64 decoding table pointer
 static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                                 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
                                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -8,13 +13,17 @@ static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                                 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                                 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
                                 'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                '4', '5', '6', '7', '8', '9', '+', '/', '='};
+                                '4', '5', '6', '7', '8', '9', '+', '/', '='}; //declare and initialize base64 encodeing table
 
 void hexdumpStdin(){
-	unsigned char ch = 0;
-	int count = 0;
-	char buff[17];
+	unsigned char ch = 0; // For every byte inputed
+	int count = 0;        // counter
+	char buff[17];        // For text that will be printed on the right column
 	while(read(0, &ch, sizeof(ch))){		
+		
+		/*
+			print one line for every 16 bytes
+		*/
 		if(count % 16 == 0){
 			
 			if(count != 0){
@@ -25,6 +34,8 @@ void hexdumpStdin(){
 		}
 	
 		printf("%02x ", ch);
+		
+		//Converting non-printable character into '.' or '~'
 		if(ch <= 0x1f || ch == 0x7f){
 			ch = '.';
 		}
@@ -43,6 +54,8 @@ void hexdumpStdin(){
 
 		
 	}
+	
+	//print '--' for the last line
 	if(count != 0){
 		while(count % 16 != 0){		
 			buff[count % 16] = ' ';
@@ -57,8 +70,11 @@ void hexdumpStdin(){
 	}
 }
 void encBase64Stdin(){
-	unsigned char buff[3] = {0, 0, 0};
-	unsigned char ch = 0;
+	unsigned char buff[3] = {0, 0, 0}; //For every 3 bytes that will be encoded
+	unsigned char ch = 0;			   //For every byte inputed
+	/*
+		b0, b1, b2, b3 are corresponding base64 characters
+	*/
 	unsigned char b0 = 0;
 	unsigned char b1 = 0;
 	unsigned char b2 = 0;
@@ -71,6 +87,10 @@ void encBase64Stdin(){
 		buff[0] = ch;
 		i = 1;
 		count++;
+		
+		/*
+			Put every 3 bytes into buff
+		*/
 		do{
 			if(read(0, &ch, sizeof(ch)) == 0)
 				break;
@@ -79,11 +99,17 @@ void encBase64Stdin(){
 			count++;
 		}while(i < 3);
 		
+		/*
+			Encoding bytes in buff into base64 characters
+		*/
 		b0 = (buff[0] & 0xfc) >> 2;
 		b1 = ((buff[0] & 0x03) << 4) | (buff[1] >> 4);
 		b2 = ((buff[1] & 0x0f) << 2) | ((buff[2] & 0xc0) >> 6);
 		b3 = buff[2] & 0x3f;
 		
+		/*
+			Solving Endgame
+		*/
 		if(i == 1){
 			b2 = b3 = 64;
 		}
@@ -113,15 +139,18 @@ void encBase64Stdin(){
 }
 void decBase64Stdin(){
 	uint32_t buff = 0;
-	uint32_t bf[4] = {0, 0, 0, 0};
-	unsigned char ch = 0;
-	unsigned char b0 = 0;
+	uint32_t bf[4] = {0, 0, 0, 0}; //For every four base64 characters that will be encoded
+	unsigned char ch = 0; // For every byte that inputed
+	/*
+		b0, b1, b2 are bytes that has been encoded.
+	*/
+	unsigned char b0 = 0; 
 	unsigned char b1 = 0;
 	unsigned char b2 = 0;
 	int i = 0, count = 0;
 	
-	base64_enc_table = generateEncTable();
-	if(!base64_enc_table){
+	base64_dec_table = generateEncTable(); //Generate base64 decoding table
+	if(!base64_dec_table){
 		printf("base64 encodeing table created error\n");
 		return;
 	}
@@ -130,17 +159,20 @@ void decBase64Stdin(){
 	while(1){
 		bf[0] = bf[1] = bf[2] = bf[3] = 0;
 		do{		
+			// Check base64 Character validity
 			if(!isValidChar(ch)){
 				printf("Invalid base64 character in stdin!\n");
 				return;
 			}
+			
+			// Filter newline sign
 			for(; ch == '\n'; count++){
 				if(read(0, &ch, sizeof(unsigned char)) <= 0){
 					break;
 				}
 			}
 			if(ch != '=' && ch != '\n'){
-				bf[i] = base64_enc_table[ch - DEC_TABLE_OFFSET];
+				bf[i] = base64_dec_table[ch - DEC_TABLE_OFFSET];
 				i++;
 			}
 			else{
@@ -151,6 +183,7 @@ void decBase64Stdin(){
 		}while(i < 4);
 		buff = (bf[0] << 24) + (bf[1] << 16) + (bf[2] << 8) + bf[3];
 		
+		// Decode base64 characters into original data
 		if(i == 0) break;
 		b0 = (buff & 0x3f000000) >> 22 | (buff & 0x00300000) >> 20;
 		b1 = (buff & 0x000f0000) >> 12 | (buff & 0x00003c00) >> 10;
@@ -165,7 +198,7 @@ void decBase64Stdin(){
 	
 	
 
-	free(base64_enc_table);
+	free(base64_dec_table);
 
 }
 void hexdumpFile(char *fileName){
@@ -240,6 +273,10 @@ void encBase64File(char *fileName){
 	unsigned char b2 = 0;
 	unsigned char b3 = 0;
 	int length = 0;
+	
+	/*
+		Get length of the file
+	*/
 	fseek(ifp, 0, SEEK_END);
 	length = ftell(ifp);
 	fseek(ifp, 0, SEEK_SET);
@@ -288,8 +325,8 @@ void decBase64File(char *fileName){
 		fprintf(stderr, "NULL Document Error!!!");
 	}
 	fseek(ifp, 0, SEEK_SET);
-	base64_enc_table = generateEncTable();
-	if(!base64_enc_table){
+	base64_dec_table = generateEncTable();
+	if(!base64_dec_table){
 		printf("insufficient Memory!\n");
 		return;
 	}
@@ -306,7 +343,7 @@ void decBase64File(char *fileName){
 			}
 			for(; ch == '\n' && count < length; ch = fgetc(ifp), count++);
 			if(ch != '=' && ch != '\n'){
-				buff[i] = base64_enc_table[ch - DEC_TABLE_OFFSET];
+				buff[i] = base64_dec_table[ch - DEC_TABLE_OFFSET];
 				i++;
 			}
 			else{
@@ -329,7 +366,7 @@ void decBase64File(char *fileName){
 	
 	
 
-	free(base64_enc_table);
+	free(base64_dec_table);
 
 }
 
